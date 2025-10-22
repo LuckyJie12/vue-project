@@ -11,11 +11,14 @@
     <el-tag type="warning">Tag 4</el-tag>
     <el-tag type="danger">Tag 5</el-tag>
   </div>
+  <el-button type="primary" @click="toggleDark()">Primary</el-button>
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
-
+import { useDark, useToggle } from '@vueuse/core'
 const value1 = ref(true)
 const value2 = ref(true)
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
 </script>
 <style></style>

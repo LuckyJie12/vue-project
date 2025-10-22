@@ -69,7 +69,4 @@ const handleClose = (key: string, keyPath: string[]) => {
 .el-menu--horizontal>.el-menu-item:nth-child(1) {
   margin-right: auto;
 }
-/* .el-main{
-  padding: 0 !important;
-} */
 </style>
