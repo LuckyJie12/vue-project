@@ -1,63 +1,65 @@
 <template>
-  <div class="common-layout">
-    <el-container>
-      <el-header>
-        <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" :ellipsis="false"
-          @select="handleSelect">
-          <el-menu-item index="0">
-            <img style="width: 100px" src="/element-plus-logo.svg" alt="Element logo" />
-          </el-menu-item>
-          <el-menu-item index="1">Processing Center</el-menu-item>
-          <el-sub-menu index="2">
-            <template #title>Workspace</template>
-            <el-menu-item index="/">item one</el-menu-item>
-            <el-menu-item index="2-2">item two</el-menu-item>
-            <el-menu-item index="2-3">item three</el-menu-item>
-            <el-sub-menu index="2-4">
-              <template #title>item four</template>
-              <el-menu-item index="2-4-1">item one</el-menu-item>
-              <el-menu-item index="2-4-2">item two</el-menu-item>
-              <el-menu-item index="2-4-3">item three</el-menu-item>
-            </el-sub-menu>
+  <el-container class="layout-container-index" style="height: 100vh">
+    <el-aside width="200px">
+      <el-scrollbar>
+        <!-- Logo 图标 -->
+        <!-- <div style="display: flex; justify-content: center; align-items: center; height: 60px;">
+          <img :src="isDark ? '/logo_black.png' : '/logo_white.png'" alt="Logo" style="width: 200px;" />
+        </div> -->
+        <div style="display: flex; justify-content: center; align-items: center; height: 60px;">
+          <img src="/logo.png" alt="Logo" style="width: 200px;" />
+        </div>
+        <el-menu router :default-active="defaultActive" class="el-menu-vertical" @open="handleOpen"
+          @close="handleClose">
+          <el-sub-menu index="1">
+            <template #title>
+              <el-icon>
+                <Monitor />
+              </el-icon>
+              <span>系统监控</span>
+            </template>
+            <el-menu-item index="/console">主控台</el-menu-item>
+            <el-menu-item index="/analytics">性能统计</el-menu-item>
+            <el-menu-item index="/about">登录趋势</el-menu-item>
           </el-sub-menu>
         </el-menu>
+      </el-scrollbar>
+    </el-aside>
+
+    <el-container>
+      <el-header style="text-align: right; font-size: 12px">
+        <div class="toolbar">
+          <el-button class="theme-toggle" @click="toggleDark()" :icon="isDark ? MoonIcon : SunIcon" circle />
+        </div>
+
       </el-header>
-      <el-container>
-        <el-aside width="200px">
-          <el-menu router :default-active="defaultActive" class="el-menu-vertical-demo" @open="handleOpen"
-            @close="handleClose" style="height: calc(100vh - 60px);">
-            <el-sub-menu index="1">
-              <template #title>
-                <el-icon>
-                  <location />
-                </el-icon>
-                <span>导航栏一</span>
-              </template>
-              <el-menu-item index="/">主页</el-menu-item>
-              <el-menu-item index="/about">关于</el-menu-item>
-            </el-sub-menu>
-          </el-menu>
-        </el-aside>
-        <el-main>
-          <el-scrollbar style="height: calc(100vh - 100px);">
-            <RouterView />
-          </el-scrollbar>
-        </el-main>
-      </el-container>
+      <el-main>
+        <el-scrollbar>
+          <RouterView />
+        </el-scrollbar>
+      </el-main>
     </el-container>
-  </div>
+  </el-container>
 </template>
-<script setup lang="ts">
-import { ref } from 'vue'
-import { RouterView } from 'vue-router'
+
+<script lang="ts" setup>
+import { ref, watch } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+import { useDark, useToggle } from '@vueuse/core'
 import {
-  Location,
+  Monitor,
+  Sunny as SunIcon,
+  Moon as MoonIcon,
 } from '@element-plus/icons-vue'
-const activeIndex = ref('1')
-const defaultActive = ref('/')
-const handleSelect = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
+const route = useRoute()
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
+const defaultActive = ref(route.path)
+
+// 监听路由变化，更新菜单激活状态
+watch(() => route.path, (newPath) => {
+  defaultActive.value = newPath
+})
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
@@ -65,8 +67,30 @@ const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
 </script>
+
 <style scoped>
-.el-menu--horizontal>.el-menu-item:nth-child(1) {
-  margin-right: auto;
+.layout-container-index .el-header {
+  position: relative;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
+.layout-container-index .el-aside {
+  border-right: 1px solid var(--el-border-color-light);
+}
+
+.layout-container-index .el-menu {
+  border-right: none;
+}
+
+.layout-container-index .el-main {
+  padding: 0;
+}
+
+.layout-container-index .toolbar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  right: 20px;
 }
 </style>

@@ -1,24 +1,64 @@
 <template>
-  <h1>我是关于页面</h1>
-  <p>开关用于在两种状态间切换。</p>
-  <h2>基础用法</h2>
-  <el-switch v-model="value1" />
-  <el-switch v-model="value2" class="ml-2" style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" />
-  <div class="flex gap-2">
-    <el-tag type="primary">Tag 1</el-tag>
-    <el-tag type="success">Tag 2</el-tag>
-    <el-tag type="info">Tag 3</el-tag>
-    <el-tag type="warning">Tag 4</el-tag>
-    <el-tag type="danger">Tag 5</el-tag>
-  </div>
-  <el-button type="primary" @click="toggleDark()">Primary</el-button>
+  <ECharts :options="chartOptions" width="500px" height="400px" />
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useDark, useToggle } from '@vueuse/core'
-const value1 = ref(true)
-const value2 = ref(true)
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+import type { EChartsOption } from 'echarts'
+import ECharts from '@/components/ECharts.vue'
+const chartOptions: EChartsOption = {
+  xAxis: {
+    type: 'category',
+    boundaryGap: false
+  },
+  yAxis: {
+    type: 'value',
+    boundaryGap: [0, '30%']
+  },
+  visualMap: {
+    type: 'piecewise',
+    show: false,
+    dimension: 0,
+    seriesIndex: 0,
+    pieces: [
+      {
+        gt: 1,
+        lt: 3,
+        color: 'rgba(0, 0, 180, 0.4)'
+      },
+      {
+        gt: 5,
+        lt: 7,
+        color: 'rgba(0, 0, 180, 0.4)'
+      }
+    ]
+  },
+  series: [
+    {
+      type: 'line',
+      smooth: 0.6,
+      symbol: 'none',
+      lineStyle: {
+        color: '#5470C6',
+        width: 5
+      },
+      markLine: {
+        symbol: ['none', 'none'],
+        label: { show: false },
+        data: [{ xAxis: 1 }, { xAxis: 3 }, { xAxis: 5 }, { xAxis: 7 }]
+      },
+      areaStyle: {},
+      data: [
+        ['2019-10-10', 200],
+        ['2019-10-11', 560],
+        ['2019-10-12', 750],
+        ['2019-10-13', 580],
+        ['2019-10-14', 250],
+        ['2019-10-15', 300],
+        ['2019-10-16', 450],
+        ['2019-10-17', 300],
+        ['2019-10-18', 100]
+      ]
+    }
+  ]
+};
 </script>
 <style></style>

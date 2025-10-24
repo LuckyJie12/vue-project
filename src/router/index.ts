@@ -1,13 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import ConsoleView from '@/views/ConsoleView.vue'
+import AnalyticsView from '@/views/AnalyticsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/console',
+      name: 'console',
+      component: ConsoleView,
+    },
+    {
+      path: '/analytics',
       name: 'home',
-      component: HomeView,
+      component: AnalyticsView,
     },
     {
       path: '/about',
