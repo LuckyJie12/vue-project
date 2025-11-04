@@ -8,15 +8,17 @@
       <h3>访问趋势</h3>
       <ECharts :options="barOptions" width="500px" height="400px" />
     </div>
+    <button @click="ChangeData()">修改查看是不是响应式</button>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { EChartsOption } from 'echarts'
+import { ref, type Ref } from 'vue'
+import type { EChartsOption, PieSeriesOption } from 'echarts'
 import ECharts from '@/components/ECharts.vue'
 
 // 饼图配置
-const pieOptions: EChartsOption = {
+const pieOptions: Ref<EChartsOption> = ref({
   tooltip: { trigger: 'item' },
   legend: { orient: 'horizontal', left: 'center', top: 'bottom' },
   series: [
@@ -37,10 +39,18 @@ const pieOptions: EChartsOption = {
       emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } }
     }
   ]
-}
+});
+const ChangeData = () => {
+  const seriesArr = pieOptions.value.series as PieSeriesOption[];
 
+  const firstData = seriesArr[0].data?.[0];
+
+  if (typeof firstData === 'object' && firstData !== null && 'value' in firstData) {
+    firstData.value = (firstData.value as number) * 2;
+  }
+}
 // 柱状图配置
-const barOptions: EChartsOption = {
+let barOptions: EChartsOption = {
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
   grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
   xAxis: { type: 'category', data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], axisTick: { alignWithLabel: true } },

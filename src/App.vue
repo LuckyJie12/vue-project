@@ -3,11 +3,8 @@
     <el-aside width="200px">
       <el-scrollbar>
         <!-- Logo 图标 -->
-        <!-- <div style="display: flex; justify-content: center; align-items: center; height: 60px;">
-          <img :src="isDark ? '/logo_black.png' : '/logo_white.png'" alt="Logo" style="width: 200px;" />
-        </div> -->
         <div style="display: flex; justify-content: center; align-items: center; height: 60px;">
-          <img src="/logo.png" alt="Logo" style="width: 200px;" />
+          <img :src="isDark ? '/aras_logo_dark.png' : '/aras_logo_light.png'" alt="Logo" style="height: 60px;" />
         </div>
         <el-menu router :default-active="defaultActive" class="el-menu-vertical" @open="handleOpen"
           @close="handleClose">

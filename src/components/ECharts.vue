@@ -3,13 +3,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, type Ref,unref } from 'vue'
 import { useDark } from '@vueuse/core'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 
 const props = withDefaults(defineProps<{
-  options: EChartsOption
+  options: EChartsOption | Ref<EChartsOption>
   width?: string
   height?: string
 }>(), {
@@ -30,7 +30,7 @@ const observer = new ResizeObserver(() => {
 const initChart = () => {
   if (chartRef.value) {
     chartInstance = echarts.init(chartRef.value, isDark.value ? 'dark' : undefined)
-    chartInstance.setOption(props.options, { replaceMerge: ['series'] })
+    chartInstance.setOption(unref(props.options), { replaceMerge: ['series'] })
   }
 }
 
@@ -39,7 +39,7 @@ const handleThemeChange = () => {
     observer.unobserve(chartRef.value)
     chartInstance.dispose()
     chartInstance = echarts.init(chartRef.value, isDark.value ? 'dark' : undefined)
-    chartInstance.setOption(props.options, { replaceMerge: ['series'] })
+    chartInstance.setOption(unref(props.options), { replaceMerge: ['series'] })
     observer.observe(chartRef.value)
   }
 }
@@ -48,7 +48,7 @@ watch(isDark, handleThemeChange)
 
 watch(() => props.options, (newOptions) => {
   if (chartInstance && !chartInstance.isDisposed()) {
-    chartInstance.setOption(newOptions)
+    chartInstance.setOption(unref(newOptions))
   }
 }, { deep: true })
 
