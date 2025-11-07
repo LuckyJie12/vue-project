@@ -111,9 +111,32 @@ const goHome = () => router.push("/console");
   height: 100vh;
 }
 
-.el-container .el-main {
-  padding: 0;
+.el-menu-item.is-active {
+  position: relative;
+  background-color: transparent !important;
+  color: var(--el-color-primary) !important;
+  font-weight: 600;
+  border-radius: 2px;
 }
+
+.el-menu-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  border-radius: 2px;
+  background-color: var(--el-color-primary);
+}
+
+.el-menu-item:hover {
+  background-color: var(--el-color-primary-light-9);
+  border-radius: 8px;
+  color: var(--el-color-primary);
+}
+
+
 
 .sidebar {
   border-right: 1px solid var(--el-border-color-light);

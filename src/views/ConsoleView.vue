@@ -8,7 +8,7 @@
       <h3>访问趋势</h3>
       <ECharts :options="barOptions" width="500px" height="400px" />
     </div>
-    <button @click="ChangeData()">修改查看是不是响应式</button>
+    <el-button @click="ChangeData()">Default</el-button>
   </div>
 </template>
 
@@ -65,7 +65,6 @@ let barOptions: EChartsOption = {
 .chart-container {
   display: flex;
   gap: 20px;
-  padding: 20px;
   flex-wrap: wrap;
 }
 
