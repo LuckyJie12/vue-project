@@ -21,14 +21,14 @@
 
       <!-- Step 2：验证动画 -->
       <div v-else-if="step === 2" key="step2" class="card verifying-card">
-        <div class="progress-frame">
-          <div class="progress-bar" :style="{ width: progress + '%' }"></div>
-        </div>
-        <div class="verifying-animation">
-          <div class="beam"></div>
+        <div class="loading-ring">
+          <div class="ring"></div>
+          <div class="ring-inner"></div>
         </div>
         <h2>正在验证文件夹...</h2>
-        <p class="desc animate-text">系统正在扫描 {{ folderName || "文件夹" }}</p>
+        <p class="desc animate-text">
+          系统正在扫描 {{ folderName || "文件夹" }}
+        </p>
       </div>
 
       <!-- Step 3：成功界面 -->
@@ -54,31 +54,22 @@ import {
   FolderAdd,
   CircleCheckFilled,
 } from "@element-plus/icons-vue";
-import { useRouter } from 'vue-router'
+import { useRouter } from "vue-router";
 import { useFileStore } from "@/store/file";
-const router = useRouter()
-// === JSON 文件列表 ===
-const REQUIRED_FILES = [
-  "HC_Monitor_ActiveUsersCount_result.json",
-  "HC_Monitor_ActiveUsers_result.json",
-  "HC_Detect_CircularReference_result.json",
-  "HC_Check_ItemType_FieldOverload_result.json",
-  "HC_Check_FormField_Overload_result.json",
-  "HC_Check_DebugMethods_result.json",
-  "HC_Validate_MethodCode_result.json",
-];
+import { HealthCheckReport } from "@/models/health_check_logs";
+
+const router = useRouter();
 const fileStore = useFileStore();
-// 状态
+
 const step = ref<number>(1);
 const folderName = ref<string>("");
-const progress = ref<number>(0);
 const folderInput = ref<HTMLInputElement | null>(null);
 
 /** 打开文件夹选择器 */
 const openFolderSelector = () => folderInput.value?.click();
 
 /** 处理文件夹选择 */
-function handleFolderUpload(event: Event) {
+const handleFolderUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement;
   const files = input.files ? Array.from(input.files) : [];
 
@@ -87,53 +78,51 @@ function handleFolderUpload(event: Event) {
     return;
   }
 
-  // 过滤出 JSON 文件
+  // 过滤 JSON 文件
   const jsonFiles = files.filter((file) => /\.json$/i.test(file.name));
-
   if (jsonFiles.length === 0) {
     ElMessage.error("该文件夹中未检测到 .json 文件");
     return;
   }
 
-  // 提取文件夹名
+  // 获取文件夹名
   const relativePath = (jsonFiles[0] as any).webkitRelativePath || "";
   folderName.value = relativePath.split("/")[0] || "未知文件夹";
 
-  startVerification(jsonFiles);
+  await startVerification(jsonFiles);
 }
 
-/** 文件验证 */
+/** 文件验证逻辑 */
 const startVerification = async (jsonFiles: File[]) => {
   step.value = 2;
-  progress.value = 0;
-  if (jsonFiles.length !== REQUIRED_FILES.length) {
-    ElMessage.error(`验证失败：缺少文件`);
+
+  try {
+    const validateFiles = await HealthCheckReport.validateFiles(jsonFiles);
+    if (!validateFiles.valid) {
+      ElMessage.error(`验证失败：缺少 ${validateFiles.missing.join(", ")}`);
+      step.value = 1;
+      return;
+    }
+    const report = await HealthCheckReport.fromFiles(jsonFiles);
+    fileStore.report = report;
+    fileStore.folderName = folderName.value;
+    fileStore.selected = true;
+    step.value = 3;
+    ElMessage.success("✅ 验证通过，系统已激活");
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("验证失败，请检查文件格式");
     step.value = 1;
-    return;
   }
-  const folderFileNames = jsonFiles.map((f) => f.name);
-  const missing = REQUIRED_FILES.filter((req) => !folderFileNames.includes(req));
-  if (missing.length > 0) {
-    ElMessage.error(`验证失败：缺少文件 ${missing.join(", ")}`);
-    step.value = 1;
-    return;
-  }
-  // 读取文件内容并且写入localStorage和修改pinia状态
-  for (const file of jsonFiles) {
-    debugger
-    const content = await file.text()
-    console.log(file.name, content)
-  }
-}
+};
 
 /** 进入后台 */
 function enterBackend() {
-  const selected = fileStore && (fileStore.selected as boolean);
-  if (!selected) {
+  if (!fileStore.selected) {
     ElMessage.error("错误：文件夹未通过验证，无法进入后台");
     return;
   }
-  router.push('/console')
+  router.push("/console");
   ElMessage.success("✅ 系统已激活，正在进入后台...");
 }
 </script>
@@ -195,71 +184,44 @@ h2 {
   color: #22c55e;
 }
 
-/* 验证阶段 */
-.verifying-card {
+/* ✅ 加载圆环动画 */
+.loading-ring {
   position: relative;
-  overflow: hidden;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
 }
 
-/* 进度条 */
-.progress-frame {
+.ring {
   width: 100%;
-  height: 12px;
-  border-radius: 6px;
-  background: #f1f5f9;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #60a5fa, #3b82f6, #60a5fa);
-  background-size: 200% 100%;
-  animation: moveGradient 1.5s linear infinite;
-  transition: width 0.2s ease;
+  border: 6px solid #e5e7eb;
+  border-top-color: #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes moveGradient {
-  0% {
-    background-position: 0 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* 扫描动画 */
-.verifying-animation {
-  position: relative;
-  height: 100px;
-  border-radius: 10px;
-  background: #f9fafb;
-  overflow: hidden;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
-}
-
-.beam {
+.ring-inner {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 10px;
-  background: linear-gradient(to bottom,
-      rgba(64, 158, 255, 0) 0%,
-      rgba(64, 158, 255, 0.5) 50%,
-      rgba(64, 158, 255, 0) 100%);
-  animation: beamMove 2.5s linear infinite;
+  top: 12px;
+  left: 12px;
+  width: 56px;
+  height: 56px;
+  border: 3px solid transparent;
+  border-top-color: #93c5fd;
+  border-radius: 50%;
+  animation: spinReverse 1.5s linear infinite;
 }
 
-@keyframes beamMove {
-  0% {
-    top: -10%;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
 
-  100% {
-    top: 100%;
+@keyframes spinReverse {
+  to {
+    transform: rotate(-360deg);
   }
 }
 
@@ -285,7 +247,7 @@ h2 {
   border-top: 4px solid #22c55e;
 }
 
-/* 页面切换 */
+/* 页面切换动画 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s, transform 0.5s;

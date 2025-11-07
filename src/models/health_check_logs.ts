@@ -1,14 +1,18 @@
 /**
- * @file hk_logs.ts
- * @description 系统健康检查报告数据模型
+ * @file HealthCheckLog.ts
+ * @description 系统健康检查报告数据模型（包含日志结构定义、校验与解析逻辑）
  */
+
+/* =============================
+ * 🧩 日志接口定义区域
+ * ============================= */
 
 /**
  * 活跃用户数量日志
  */
 export interface ActiveUserCountLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** 当前活跃用户数量 */
   applicationActiveuser: number
 }
@@ -18,7 +22,7 @@ export interface ActiveUserCountLog {
  */
 export interface ActiveUserLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** 登录用户名 */
   login_name: string
   /** 用户全名 */
@@ -34,7 +38,7 @@ export interface ActiveUserLog {
  */
 export interface CircularReferenceLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** 类型名称 */
   type: string
   /** 来源项 */
@@ -58,7 +62,7 @@ export interface CircularReferenceLog {
  */
 export interface ItemTypeOverloadLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** 超出属性数 */
   greater_property_count: string
   /** 超出 Item 属性数 */
@@ -70,7 +74,7 @@ export interface ItemTypeOverloadLog {
  */
 export interface FormFieldOverloadLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** ItemType 名称 */
   greater_formfd_itemtype: string
   /** 表单名称 */
@@ -88,7 +92,7 @@ export interface FormFieldOverloadLog {
  */
 export interface DebugMethodLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** 方法名称 */
   method_name: string
   /** 方法类型（C#/JS等） */
@@ -110,7 +114,7 @@ export interface DebugMethodLog {
  */
 export interface MethodValidationLog {
   /** 记录时间 */
-  entry_date: Date
+  entry_date: string
   /** 方法名称 */
   method_name: string
   /** 方法类型（C#/JS等） */
