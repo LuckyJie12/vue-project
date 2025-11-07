@@ -11,34 +11,40 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/select-log",
-      name: "select-log",
-      component: SelectLogView,
-      meta: { fullScreen: true },
-    },
-    {
       path: "/",
       redirect: "/console",
     },
     {
       path: "/console",
-      name: "console",
-      component: ConsoleView,
+      component: () => import("@/layouts/Layout.vue"),
+      children: [
+        {
+          path: "",
+          name: "console",
+          component: ConsoleView,
+        },
+        {
+          path: "/analytics",
+          name: "analytics",
+          component: AnalyticsView,
+        },
+        {
+          path: "/about",
+          name: "about",
+          component: AboutView,
+        },
+      ],
     },
     {
-      path: "/analytics",
-      name: "analytics",
-      component: AnalyticsView,
-    },
-    {
-      path: "/about",
-      name: "about",
-      component: AboutView,
+      path: "/selectlog",
+      name: "selectlog",
+      component: SelectLogView,
+      meta: { fullScreen: true },
     },
     // 通配符匹配所有未定义路由
     {
       path: "/:pathMatch(.*)*",
-      name: "not-found",
+      name: "notfound",
       component: NotFoundView,
       meta: { fullScreen: true },
     },
@@ -47,24 +53,27 @@ const router = createRouter({
 
 export default router;
 
-/** ✅ 全局路由守卫 */
+/** 全局路由守卫 */
 router.beforeEach((to, from, next) => {
   const fileStore = useFileStore();
-
-  // 在首次加载时 Pinia 可能尚未初始化（SSR/刷新）
   const selected = !!fileStore.selected;
 
-  // 已经激活：禁止进入 /select-log
-  if (to.path === "/select-log" && selected) {
-    ElMessage.success("✅ 系统已激活，正在进入后台...");
-    return next("/console");
+  // 放行所有带 fullScreen 的页面
+  if (to.matched.some((r) => r.meta.fullScreen)) {
+    // 如果系统已激活，则禁止重复进入选择日志页
+    if (to.path === "/selectlog" && selected) {
+      ElMessage.success("✅ 系统已激活，正在进入后台...");
+      return next("/console");
+    }
+    return next();
   }
 
-  // 未激活：禁止访问除 /select-log 以外的页面
-  if (!selected && to.path !== "/select-log") {
+  // 如果未激活则跳转到选择日志页
+  if (!selected) {
     ElMessage.warning("请先选择 log 文件以激活系统");
-    return next("/select-log");
+    return next("/selectlog");
   }
 
+  // 否则放行
   next();
 });
